@@ -46,7 +46,7 @@ install() {
 
 	mkdir -p "${bin_install_path}"
 
-	cp assume assume.fish assumego granted  "${bin_install_path}/granted"
+	cp assume assume.fish assumego granted "${bin_install_path}"
 	chmod +x "${bin_install_path}/{assume,assume.fish,assumego,granted}"
 
 	popd >/dev/null
