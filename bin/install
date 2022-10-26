@@ -50,7 +50,6 @@ install() {
   chmod +x "${bin_install_path}"/{assume,assume.fish,assumego,granted}
 
   echo "Granted is installed. Please add following line to your ~/.bashrc, ~/.bash_profile, ~/.profile, ~/.zshenv or ~/.config/fish/config.fish:"
-  echo
   echo "alias assume='source \$(asdf which assume)'"
 
   popd >/dev/null
