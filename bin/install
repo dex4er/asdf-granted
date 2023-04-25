@@ -43,11 +43,9 @@ install() {
 
 	curl -sLO "${download_url}"
 
-	tar zxf "${download_filename}"
-
 	mkdir -p "${bin_install_path}"
 
-	cp -p * "${bin_install_path}"
+	tar -zxf "${download_filename}" -C "${bin_install_path}"
 
 	echo "Granted is installed. Please add following line to your ~/.bashrc, ~/.bash_profile, ~/.profile, ~/.zshenv or ~/.config/fish/config.fish:"
 	echo "alias assume='source \$(asdf which assume)'"
