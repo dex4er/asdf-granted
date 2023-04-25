@@ -47,6 +47,10 @@ install() {
 
 	tar -zxf "${download_filename}" -C "${bin_install_path}"
 
+	if ! [[ -f ${bin_install_path}/assumego ]]; then
+		ln -s granted "${bin_install_path}/assumego"
+	fi
+
 	echo "Granted is installed. Please add following line to your ~/.bashrc, ~/.bash_profile, ~/.profile, ~/.zshenv or ~/.config/fish/config.fish:"
 	echo "alias assume='source \$(asdf which assume)'"
 
