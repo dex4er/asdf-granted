@@ -7,52 +7,52 @@ set -euo pipefail
 [[ -z ${ASDF_INSTALL_PATH+x} ]] && echo "ASDF_INSTALL_PATH is required" && exit 1
 
 install() {
-  local install_type=$1
-  [[ ${install_type} != "version" ]] && echo "intall type, ${install_type}, is not supported" && exit 1
+	local install_type=$1
+	[[ ${install_type} != "version" ]] && echo "install type, ${install_type}, is not supported" && exit 1
 
-  local version=$2
-  local install_path=$3
+	local version=$2
+	local install_path=$3
 
-  local tmp_download_dir
+	local tmp_download_dir
 
-  if [[ -z ${TMPDIR:-} ]]; then
-    tmp_download_dir=$(mktemp -d)
-  else
-    tmp_download_dir=${TMPDIR%/}
-  fi
+	if [[ -z ${TMPDIR:-} ]]; then
+		tmp_download_dir=$(mktemp -d)
+	else
+		tmp_download_dir=${TMPDIR%/}
+	fi
 
-  local bin_install_path="${install_path}/bin"
+	local bin_install_path="${install_path}/bin"
 
-  local platform
-  platform=$(uname | tr '[:upper:]' '[:lower:]')
+	local platform
+	platform=$(uname | tr '[:upper:]' '[:lower:]')
 
-  local arch
-  arch=$(uname -m)
-  case "${arch}" in
-  aarch64) arch="arm64" ;;
-  i?86) arch="i386" ;;
-  esac
+	local arch
+	arch=$(uname -m)
+	case "${arch}" in
+	aarch64) arch="arm64" ;;
+	i?86) arch="i386" ;;
+	esac
 
-  local download_url
-  download_url="http://releases.commonfate.io/granted/v${version}/granted_${version}_${platform}_${arch}.tar.gz"
+	local download_url
+	download_url="https://releases.commonfate.io/granted/v${version}/granted_${version}_${platform}_${arch}.tar.gz"
 
-  echo "Downloading Granted from ${download_url}"
+	echo "Downloading Granted from ${download_url}"
 
-  pushd "${tmp_download_dir}" >/dev/null
+	pushd "${tmp_download_dir}" >/dev/null
 
-  curl -sLO "${download_url}"
+	curl -sLO "${download_url}"
 
-  tar zxf "granted_${version}_${platform}_${arch}.tar.gz"
+	tar zxf "granted_${version}_${platform}_${arch}.tar.gz"
 
-  mkdir -p "${bin_install_path}"
+	mkdir -p "${bin_install_path}"
 
-  cp assume assume.fish assumego granted "${bin_install_path}"
-  chmod +x "${bin_install_path}"/{assume,assume.fish,assumego,granted}
+	cp assume assume.fish assumego granted "${bin_install_path}"
+	chmod +x "${bin_install_path}"/{assume,assume.fish,assumego,granted}
 
-  echo "Granted is installed. Please add following line to your ~/.bashrc, ~/.bash_profile, ~/.profile, ~/.zshenv or ~/.config/fish/config.fish:"
-  echo "alias assume='source \$(asdf which assume)'"
+	echo "Granted is installed. Please add following line to your ~/.bashrc, ~/.bash_profile, ~/.profile, ~/.zshenv or ~/.config/fish/config.fish:"
+	echo "alias assume='source \$(asdf which assume)'"
 
-  popd >/dev/null
+	popd >/dev/null
 }
 
 install "${ASDF_INSTALL_TYPE}" "${ASDF_INSTALL_VERSION}" "${ASDF_INSTALL_PATH}"
