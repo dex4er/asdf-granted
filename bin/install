@@ -37,7 +37,7 @@ install() {
 	local download_filename="granted_${version}_${platform}_${arch}.tar.gz"
 	local download_url="https://releases.commonfate.io/granted/${prefix}${version}/${download_filename}"
 
-	echo "Downloading Granted from ${download_url}"
+	echo "Downloading from ${download_url}"
 
 	pushd "${tmp_download_dir}" >/dev/null
 

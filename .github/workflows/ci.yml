@@ -36,7 +36,7 @@ jobs:
       - name: Test plugin
         uses: asdf-vm/actions/plugin-test@v1
         with:
-          command: granted --version
+          command: assume --version; granted --version
 
   macos:
     runs-on: macos-latest
@@ -45,4 +45,4 @@ jobs:
       - name: Test plugin
         uses: asdf-vm/actions/plugin-test@v1
         with:
-          command: granted --version
+          command: assume --version; granted --version
