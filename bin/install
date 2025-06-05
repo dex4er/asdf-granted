@@ -7,7 +7,18 @@ shopt -s inherit_errexit 2>/dev/null || true
 [[ -z ${ASDF_INSTALL_VERSION+x} ]] && echo "ASDF_INSTALL_VERSION is required" && exit 1
 [[ -z ${ASDF_INSTALL_PATH+x} ]] && echo "ASDF_INSTALL_PATH is required" && exit 1
 
-install() {
+function gh_curl() {
+	if [[ -n ${GITHUB_TOKEN-} ]]; then
+		curl -fLsS -H "Authorization: token ${GITHUB_TOKEN}" "$@"
+	elif [[ -n ${GITHUB_API_TOKEN-} ]]; then
+		curl -fLsS -H "Authorization: token ${GITHUB_API_TOKEN}" "$@"
+	else
+		curl -fLsS "$@"
+	fi
+}
+
+function install() {
+	# set -x
 	local install_type=$1
 	[[ ${install_type} != "version" ]] && echo "install type, ${install_type}, is not supported" && exit 1
 
@@ -22,23 +33,39 @@ install() {
 	local bin_install_path="${install_path}/bin"
 
 	local platform
-	platform=$(uname | tr '[:upper:]' '[:lower:]')
+	platform=$(echo "${ASDF_PLATFORM:-$(uname -s)}" | tr 'A-Z' 'a-z')
 
 	local arch
-	arch=$(uname -m)
+	arch=${ASDF_ARCH:-$(uname -m)}
 	case "${arch}" in
-	aarch64) arch="arm64" ;;
-	i?86) arch="i386" ;;
+	aarch64) arch=arm64 ;;
+	x86_64) arch=amd64 ;;
 	esac
 
+	local download_url
+
+	local repo="fwdcloudsec/granted"
 	local download_filename="granted_${version}_${platform}_${arch}.tar.gz"
-	local download_url="https://releases.commonfate.io/granted/${prefix}${version}/${download_filename}"
+
+	if [[ -n ${GITHUB_TOKEN-} ]] || [[ -n ${GITHUB_API_TOKEN-} ]]; then
+		local asset_url
+		asset_url="https://api.github.com/repos/${repo}/releases/tags/${prefix}${version}"
+		download_url=$(gh_curl -H "Accept: application/vnd.github.v3.raw" "${asset_url}" | jq -r ".assets | map(select(.name == \"${download_filename}\"))[0].url")
+		if [[ ${download_url} == null ]]; then
+			echo "Asset ${download_filename} not found in a release ${prefix}${version}."
+			exit 1
+		fi
+	else
+		download_url="https://github.com/${repo}/releases/download/${prefix}${version}/${download_filename}"
+	fi
 
 	echo "Downloading ${download_filename} from release ${prefix}${version} from ${download_url}"
 
+	mkdir -p "${tmp_download_dir}"
+
 	pushd "${tmp_download_dir}" >/dev/null
 
-	curl -sLO "${download_url}"
+	gh_curl -H "Accept: application/octet-stream" -o "${download_filename}" "${download_url}"
 
 	mkdir -p "${bin_install_path}"
 
@@ -50,6 +77,8 @@ install() {
 
 	echo "Granted is installed. Please add following line to your ~/.bashrc, ~/.bash_profile, ~/.profile, ~/.zshenv or ~/.config/fish/config.fish:"
 	echo "alias assume='source \$(asdf which assume)'"
+	echo "or:"
+	echo "alias assume='source \$(mise which assume)'"
 
 	popd >/dev/null
 }
