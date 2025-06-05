@@ -34,12 +34,12 @@ function install() {
 
 	pushd "${ASDF_DOWNLOAD_PATH:=}" >/dev/null
 
-	mkdir -p "${ASDF_INSTALL_PATH}"
+	mkdir -p "${ASDF_INSTALL_PATH}/bin"
 
-	tar -zxf "${download_filename}" -C "${ASDF_INSTALL_PATH}"
+	tar -zxf "${download_filename}" -C "${ASDF_INSTALL_PATH}/bin/"
 
-	if ! [[ -f ${ASDF_INSTALL_PATH}/assumego ]]; then
-		ln -s granted "${ASDF_INSTALL_PATH}/assumego"
+	if ! [[ -f ${ASDF_INSTALL_PATH}/bin/assumego ]]; then
+		ln -s granted "${ASDF_INSTALL_PATH}/bin/assumego"
 	fi
 
 	echo "Granted is installed. Please add following line to your ~/.bashrc, ~/.bash_profile, ~/.profile, ~/.zshenv or ~/.config/fish/config.fish:"
