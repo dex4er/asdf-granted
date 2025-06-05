@@ -1,0 +1,65 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+shopt -s inherit_errexit 2>/dev/null || true
+
+[[ -z ${ASDF_DOWNLOAD_PATH+x} ]] && echo "ASDF_DOWNLOAD_PATH is required" && exit 1
+[[ -z ${ASDF_INSTALL_TYPE+x} ]] && echo "ASDF_INSTALL_TYPE is required" && exit 1
+[[ -z ${ASDF_INSTALL_VERSION+x} ]] && echo "ASDF_INSTALL_VERSION is required" && exit 1
+[[ -z ${ASDF_INSTALL_PATH+x} ]] && echo "ASDF_INSTALL_PATH is required" && exit 1
+
+function gh_curl() {
+	if [[ -n ${GITHUB_TOKEN-} ]]; then
+		curl -fLsS -H "Authorization: token ${GITHUB_TOKEN}" "$@"
+	elif [[ -n ${GITHUB_API_TOKEN-} ]]; then
+		curl -fLsS -H "Authorization: token ${GITHUB_API_TOKEN}" "$@"
+	else
+		curl -fLsS "$@"
+	fi
+}
+
+function download() {
+	# set -x
+	[[ ${ASDF_INSTALL_TYPE:=} != "version" ]] && echo "install type, ${ASDF_INSTALL_TYPE}, is not supported" && exit 1
+
+	local prefix="v"
+
+	local platform
+	platform=$(echo "${ASDF_PLATFORM:-$(uname -s)}" | tr 'A-Z' 'a-z')
+
+	local arch
+	arch=${ASDF_ARCH:-$(uname -m)}
+	case "${arch}" in
+	aarch64) arch=arm64 ;;
+	x86_64) arch=amd64 ;;
+	esac
+
+	local download_url
+
+	local repo="fwdcloudsec/granted"
+	local download_filename="granted_${ASDF_INSTALL_VERSION:=}_${platform}_${arch}.tar.gz"
+
+	if [[ -n ${GITHUB_TOKEN-} ]] || [[ -n ${GITHUB_API_TOKEN-} ]]; then
+		local asset_url
+		asset_url="https://api.github.com/repos/${repo}/releases/tags/${prefix}${ASDF_INSTALL_VERSION}"
+		download_url=$(gh_curl -H "Accept: application/vnd.github.v3.raw" "${asset_url}" | jq -r ".assets | map(select(.name == \"${download_filename}\"))[0].url")
+		if [[ ${download_url} == null ]]; then
+			echo "Asset ${download_filename} not found in a release ${prefix}${ASDF_INSTALL_VERSION}."
+			exit 1
+		fi
+	else
+		download_url="https://github.com/${repo}/releases/download/${prefix}${ASDF_INSTALL_VERSION}/${download_filename}"
+	fi
+
+	echo "Downloading ${download_filename} from release ${prefix}${ASDF_INSTALL_VERSION} from ${download_url}"
+
+	mkdir -p "${ASDF_DOWNLOAD_PATH:=}"
+
+	pushd "${ASDF_DOWNLOAD_PATH}" >/dev/null
+
+	gh_curl -H "Accept: application/octet-stream" -o "${download_filename}" "${download_url}"
+
+	popd >/dev/null
+}
+
+download
