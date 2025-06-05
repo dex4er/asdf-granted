@@ -37,8 +37,6 @@ function install() {
 
 	pushd "${ASDF_DOWNLOAD_PATH:=}" >/dev/null
 
-	gh_curl -H "Accept: application/octet-stream" -o "${download_filename}" "${download_url}"
-
 	mkdir -p "${ASDF_INSTALL_PATH}"
 
 	tar -zxf "${download_filename}" -C "${ASDF_INSTALL_PATH}"
