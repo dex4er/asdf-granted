@@ -30,8 +30,6 @@ function install() {
 	aarch64) arch=arm64 ;;
 	esac
 
-	local download_url
-
 	local download_filename="granted_${ASDF_INSTALL_VERSION}_${platform}_${arch}.tar.gz"
 
 	pushd "${ASDF_DOWNLOAD_PATH:=}" >/dev/null
