@@ -14,7 +14,7 @@ function gh_curl() {
 }
 
 function filter_versions() {
-	grep -vE '^(0\.[12]\.|0\.3\.0$)'
+	grep -vE '^(0\.[0-9]\.|0\.[12][0-9]\.|0\.3[0-4]\.)'
 }
 
 function sort_versions() {
