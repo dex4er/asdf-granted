@@ -21,8 +21,6 @@ function gh_curl() {
 function install() {
 	# set -x
 
-	./download
-
 	local platform
 	platform=$(echo "${ASDF_PLATFORM:-$(uname -s)}" | tr 'A-Z' 'a-z')
 
